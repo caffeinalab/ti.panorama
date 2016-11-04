@@ -545,6 +545,7 @@ GLKQuaternion GLKQuaternionFromTwoVectors(GLKVector3 u, GLKVector3 v){
 -(GLKTextureInfo *) loadTextureFromBundle:(NSString *) filename{
     if(!filename) return nil;
     NSString *path = [[NSBundle mainBundle] pathForResource:filename ofType:NULL];
+    NSLog(@"Loading FROM BUNDLE %@", path);
     return [self loadTextureFromPath:path];
 }
 -(GLKTextureInfo *) loadTextureFromPath:(NSString *) path{

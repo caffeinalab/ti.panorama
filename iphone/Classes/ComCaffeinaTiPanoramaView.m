@@ -11,56 +11,59 @@
 
 @implementation ComCaffeinaTiPanoramaView
 
+-(void)initializeState
+{
+    [super initializeState];
+
+    if (self.pv == nil) {
+        self.pv = [[PanoramaView alloc] initWithFrame:self.frame];
+        [self.pv setDelegate:self];
+        [self.pv setImageWithName:@"park_2048.jpg"];
+        [self.pv setOrientToDevice:YES];
+        [self.pv setTouchToPan:NO];
+        [self.pv setPinchToZoom:YES];
+        [self.pv setShowTouches:NO];
+        [self.pv setVRMode:NO];
+        
+        [self addSubview:self.pv];
+
+    }
+}
+
 -(void)dealloc
 {
     [super dealloc];
 }
 
 
--(PanoramaView*)pv
-{
-    if (pv == nil) {
-        pv = [[PanoramaView alloc] initWithFrame:[self bounds]];
-        [pv setDelegate:self];
-        [pv setImageWithName:@"images/park_2048.jpg"];
-        [pv setOrientToDevice:YES];
-        [pv setTouchToPan:NO];
-        [pv setPinchToZoom:YES];
-        [pv setShowTouches:NO];
-        [pv setVRMode:NO];
-        [pv setBackgroundColor:[UIColor blueColor]];
-        
-        [self addSubview:pv];
-    
-    }
-    return pv;
-}
-
-
-
 -(void)setImage_:(id)value
 {    
 //    ENSURE_STRING(value);
-//    NSString* image = [TiUtils stringValue:value];
-//    NSString* filePath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:image];
-//    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
-//        NSLog(@"Setting image %@", filePath);
-//        [[self pv] setImageWithName:filePath];
-//    } else {
-//        NSLog(@"[ERROR] Unable to find file %@", filePath)
+//    
+//    UIImage* image = [TiUtils toImage:value proxy:nil];
+//    if (image == nil) {
+//       DebugLog(@"Image is null");
 //    }
+//    [self.pv setImage:image];
 }
 
 - (void)frameSizeChanged:(CGRect)frame bounds:(CGRect)bounds
 {
-    [TiUtils setView:pv positionRect:bounds];
+    [TiUtils setView:self.pv positionRect:bounds];
     [super frameSizeChanged:frame bounds:bounds];
+}
+
+
+-(void)draw:(id)args
+{
+    ENSURE_UI_THREAD_0_ARGS
+    [self.pv draw];
 }
 
 #pragma mark Delegates
 
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect {
-    [pv draw];
+    [self draw:nil];
 }
 
 

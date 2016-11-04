@@ -10,6 +10,9 @@
 #import "ComCaffeinaTiPanoramaView.h"
 
 @interface ComCaffeinaTiPanoramaViewProxy : TiViewProxy {
+    
 }
+
+-(void)draw:(id)args;
 
 @end
