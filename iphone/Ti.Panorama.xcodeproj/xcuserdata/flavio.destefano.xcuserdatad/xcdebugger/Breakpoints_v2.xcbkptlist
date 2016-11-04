@@ -42,13 +42,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Classes/ComCaffeinaTiPanoramaView.h"
-            timestampString = "499884544.18946"
+            timestampString = "499945298.816317"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "19"
-            endingLineNumber = "19"
-            landmarkName = "@interface ComCaffeinaTiPanoramaView"
-            landmarkType = "2">
+            startingLineNumber = "18"
+            endingLineNumber = "18"
+            landmarkName = "-setImage_:"
+            landmarkType = "6">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -57,14 +57,14 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Classes/ComCaffeinaTiPanoramaView.m"
-            timestampString = "499884795.28491"
+            filePath = "Classes/PanoramaViewController.h"
+            timestampString = "499947379.683739"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "21"
-            endingLineNumber = "21"
-            landmarkName = "-pv"
-            landmarkType = "7">
+            startingLineNumber = "14"
+            endingLineNumber = "14"
+            landmarkName = "pv"
+            landmarkType = "24">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

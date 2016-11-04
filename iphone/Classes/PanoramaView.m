@@ -36,7 +36,8 @@ GLKQuaternion GLKQuaternionFromTwoVectors(GLKVector3 u, GLKVector3 v){
 -(bool) execute;
 -(id) init:(GLint)stacks slices:(GLint)slices radius:(GLfloat)radius textureFile:(NSString *)textureFile;
 -(void) swapTexture:(NSString*)textureFile;
--(CGPoint) getTextureSize;
+-(void) swapTextureWithImage:(UIImage*)image;
+-(CGSize) getTextureSize;
 
 @end
 
@@ -54,13 +55,13 @@ GLKQuaternion GLKQuaternionFromTwoVectors(GLKVector3 u, GLKVector3 v){
 @implementation PanoramaView
 
 -(id) init{
-// it appears that iOS already automatically does this switch, stored in UIScreen mainscreen bounds
-//    CGRect frame = [[UIScreen mainScreen] bounds];
-//    if(SENSOR_ORIENTATION == 3 || SENSOR_ORIENTATION == 4){
-//        return [self initWithFrame:CGRectMake(frame.origin.x, frame.origin.y, frame.size.height, frame.size.width)];
-//    } else{
-//        return [self initWithFrame:CGRectMake(frame.origin.x, frame.origin.y, frame.size.width, frame.size.height)];
-//    }
+    // it appears that iOS already automatically does this switch, stored in UIScreen mainscreen bounds
+    //    CGRect frame = [[UIScreen mainScreen] bounds];
+    //    if(SENSOR_ORIENTATION == 3 || SENSOR_ORIENTATION == 4){
+    //        return [self initWithFrame:CGRectMake(frame.origin.x, frame.origin.y, frame.size.height, frame.size.width)];
+    //    } else{
+    //        return [self initWithFrame:CGRectMake(frame.origin.x, frame.origin.y, frame.size.width, frame.size.height)];
+    //    }
     return [self initWithFrame:[[UIScreen mainScreen] bounds]];
 }
 - (id)initWithFrame:(CGRect)frame{
@@ -80,7 +81,7 @@ GLKQuaternion GLKQuaternionFromTwoVectors(GLKVector3 u, GLKVector3 v){
     return self;
 }
 -(void) didMoveToSuperview{
-// this breaks MVC, but useful for setting GLKViewController's frame rate
+    // this breaks MVC, but useful for setting GLKViewController's frame rate
     UIResponder *responder = self;
     while (![responder isKindOfClass:[GLKViewController class]]) {
         responder = [responder nextResponder];
@@ -105,8 +106,11 @@ GLKQuaternion GLKQuaternionFromTwoVectors(GLKVector3 u, GLKVector3 v){
     _fieldOfView = fieldOfView;
     [self rebuildProjectionMatrix];
 }
--(void) setImage:(NSString*)fileName{
+-(void) setImageWithName:(NSString*)fileName{
     [sphere swapTexture:fileName];
+}
+-(void) setImage:(UIImage *)image {
+    [sphere swapTextureWithImage:image];
 }
 -(void) setTouchToPan:(BOOL)touchToPan{
     _touchToPan = touchToPan;
@@ -123,6 +127,16 @@ GLKQuaternion GLKQuaternionFromTwoVectors(GLKVector3 u, GLKVector3 v){
             [motionManager startDeviceMotionUpdates];
         else
             [motionManager stopDeviceMotionUpdates];
+    }
+}
+-(void) setVRMode:(BOOL)VRMode{
+    _VRMode = VRMode;
+    if(_VRMode){
+        _aspectRatio = self.frame.size.width/(self.frame.size.height*0.5);
+        [self rebuildProjectionMatrix];
+    } else{
+        _aspectRatio = self.frame.size.width/self.frame.size.height;
+        [self rebuildProjectionMatrix];
     }
 }
 #pragma mark- OPENGL
@@ -142,52 +156,71 @@ GLKQuaternion GLKQuaternionFromTwoVectors(GLKVector3 u, GLKVector3 v){
     GLfloat frustum = Z_NEAR * tanf(_fieldOfView*0.00872664625997);  // pi/180/2
     _projectionMatrix = GLKMatrix4MakeFrustum(-frustum, frustum, -frustum/_aspectRatio, frustum/_aspectRatio, Z_NEAR, Z_FAR);
     glMultMatrixf(_projectionMatrix.m);
-    glViewport(0, 0, self.frame.size.width, self.frame.size.height);
+    if(!_VRMode){
+        glViewport(0, 0, self.frame.size.width, self.frame.size.height);
+    } else{
+        // no matter. glViewport gets called every draw call anyway.
+    }
     glMatrixMode(GL_MODELVIEW);
 }
 -(void) customGL{
     glMatrixMode(GL_MODELVIEW);
-//    glEnable(GL_CULL_FACE);
-//    glCullFace(GL_FRONT);
-//    glEnable(GL_DEPTH_TEST);
+    //	glEnable(GL_CULL_FACE);
+    //	glCullFace(GL_FRONT);
+    //	glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 -(void)draw{
-    static GLfloat whiteColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
-    static GLfloat clearColor[] = {0.0f, 0.0f, 0.0f, 0.0f};
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT);
+    if(_VRMode) {
+        float scale = [UIScreen mainScreen].scale;
+        // one eye
+        glMatrixMode(GL_PROJECTION);
+        glViewport(0, 0, self.frame.size.width * scale, self.frame.size.height * scale * 0.5);
+        glMatrixMode(GL_MODELVIEW);
+        [self renderScene];
+        // other eye
+        glMatrixMode(GL_PROJECTION);
+        glViewport(0, self.frame.size.height * scale * 0.5, self.frame.size.width * scale, self.frame.size.height * scale* 0.5);
+        glMatrixMode(GL_MODELVIEW);
+        [self renderScene];
+    }else{
+        [self renderScene];
+    }
+}
+-(void) renderScene{
+    static GLfloat whiteColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
+    static GLfloat clearColor[] = {0.0f, 0.0f, 0.0f, 0.0f};
     glPushMatrix(); // begin device orientation
-
-        _attitudeMatrix = GLKMatrix4Multiply([self getDeviceOrientationMatrix], _offsetMatrix);
-        [self updateLook];
+    _attitudeMatrix = GLKMatrix4Multiply([self getDeviceOrientationMatrix], _offsetMatrix);
+    [self updateLook];
+    glMultMatrixf(_attitudeMatrix.m);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, whiteColor);  // panorama at full color
+    [sphere execute];
+    glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, clearColor);
+    //		[meridians execute];  // semi-transparent texture overlay (15° meridian lines)
     
-        glMultMatrixf(_attitudeMatrix.m);
+    //TODO: add any objects here to make them a part of the virtual reality
+    //		glPushMatrix();
+    //			// object code
+    //		glPopMatrix();
     
-        glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, whiteColor);  // panorama at full color
-        [sphere execute];
-        glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, clearColor);
-//        [meridians execute];  // semi-transparent texture overlay (15° meridian lines)
-
-//TODO: add any objects here to make them a part of the virtual reality
-//        glPushMatrix();
-//        // object code
-//        glPopMatrix();
-    
-        // touch lines
-        if(_showTouches && _numberOfTouches){
-            glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
-            for(int i = 0; i < [[_touches allObjects] count]; i++){
-                glPushMatrix();
-                    CGPoint touchPoint = CGPointMake([(UITouch*)[[_touches allObjects] objectAtIndex:i] locationInView:self].x,
-                                                     [(UITouch*)[[_touches allObjects] objectAtIndex:i] locationInView:self].y);
-                    [self drawHotspotLines:[self vectorFromScreenLocation:touchPoint inAttitude:_attitudeMatrix]];
-                glPopMatrix();
+    // touch lines
+    if(_showTouches && _numberOfTouches){
+        glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
+        for(int i = 0; i < [[_touches allObjects] count]; i++){
+            glPushMatrix();
+            CGPoint touchPoint = CGPointMake([(UITouch*)[[_touches allObjects] objectAtIndex:i] locationInView:self].x, [(UITouch*)[[_touches allObjects] objectAtIndex:i] locationInView:self].y);
+            if(_VRMode){
+                touchPoint.y = ( (int)touchPoint.y % (int)(self.frame.size.height * 0.5) ) * 2.0;
             }
-            glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+            [self drawHotspotLines:[self vectorFromScreenLocation:touchPoint inAttitude:_attitudeMatrix]];
+            glPopMatrix();
         }
-    
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+    }
     glPopMatrix(); // end device orientation
 }
 #pragma mark- ORIENTATION
@@ -196,31 +229,31 @@ GLKQuaternion GLKQuaternionFromTwoVectors(GLKVector3 u, GLKVector3 v){
         CMRotationMatrix a = [[[motionManager deviceMotion] attitude] rotationMatrix];
         // arrangements of mappings of sensor axis to virtual axis (columns)
         // and combinations of 90 degree rotations (rows)
-        if(SENSOR_ORIENTATION == 4){
-            return GLKMatrix4Make( a.m21,-a.m11, a.m31, 0.0f,
-                                   a.m23,-a.m13, a.m33, 0.0f,
-                                  -a.m22, a.m12,-a.m32, 0.0f,
-                                   0.0f , 0.0f , 0.0f , 1.0f);
+        switch (SENSOR_ORIENTATION) {
+            case 4:
+                return GLKMatrix4Make( a.m21,-a.m11, a.m31, 0.0f,
+                                      a.m23,-a.m13, a.m33, 0.0f,
+                                      -a.m22, a.m12,-a.m32, 0.0f,
+                                      0.0f , 0.0f , 0.0f , 1.0f);
+            case 3:
+                return GLKMatrix4Make(-a.m21, a.m11, a.m31, 0.0f,
+                                      -a.m23, a.m13, a.m33, 0.0f,
+                                      a.m22,-a.m12,-a.m32, 0.0f,
+                                      0.0f , 0.0f , 0.0f , 1.0f);
+            case 2:
+                return GLKMatrix4Make(-a.m11,-a.m21, a.m31, 0.0f,
+                                      -a.m13,-a.m23, a.m33, 0.0f,
+                                      a.m12, a.m22,-a.m32, 0.0f,
+                                      0.0f , 0.0f , 0.0f , 1.0f);
+            case 1:
+            default:
+                return GLKMatrix4Make( a.m11, a.m21, a.m31, 0.0f,
+                                      a.m13, a.m23, a.m33, 0.0f,
+                                      -a.m12,-a.m22,-a.m32, 0.0f,
+                                      0.0f , 0.0f , 0.0f , 1.0f);
         }
-        if(SENSOR_ORIENTATION == 3){
-            return GLKMatrix4Make(-a.m21, a.m11, a.m31, 0.0f,
-                                  -a.m23, a.m13, a.m33, 0.0f,
-                                   a.m22,-a.m12,-a.m32, 0.0f,
-                                   0.0f , 0.0f , 0.0f , 1.0f);
-        }
-        if(SENSOR_ORIENTATION == 2){
-            return GLKMatrix4Make(-a.m11,-a.m21, a.m31, 0.0f,
-                                  -a.m13,-a.m23, a.m33, 0.0f,
-                                   a.m12, a.m22,-a.m32, 0.0f,
-                                   0.0f , 0.0f , 0.0f , 1.0f);
-        }
-        return GLKMatrix4Make(a.m11, a.m21, a.m31, 0.0f,
-                              a.m13, a.m23, a.m33, 0.0f,
-                             -a.m12,-a.m22,-a.m32, 0.0f,
-                              0.0f , 0.0f , 0.0f , 1.0f);
     }
-    else
-        return GLKMatrix4Identity;
+    return GLKMatrix4Identity;
 }
 -(void) orientToVector:(GLKVector3)v{
     _attitudeMatrix = GLKMatrix4MakeLookAt(0, 0, 0, v.x, v.y, v.z,  0, 1, 0);
@@ -240,12 +273,13 @@ GLKQuaternion GLKQuaternionFromTwoVectors(GLKVector3 u, GLKVector3 v){
     return [self imagePixelFromVector:[self vectorFromScreenLocation:point inAttitude:_attitudeMatrix]];
 }
 -(CGPoint) imagePixelFromVector:(GLKVector3)vector{
-    CGPoint pxl = CGPointMake((M_PI-atan2f(-vector.z, -vector.x))/(2*M_PI), acosf(vector.y)/M_PI);
-    CGPoint tex = [sphere getTextureSize];
+    CGPoint pxl = CGPointMake((atan2f(-vector.x, vector.z))/(2*M_PI), acosf(vector.y)/M_PI);
+    if(pxl.x < 0.0) pxl.x += 1.0;
+    CGSize tex = [sphere getTextureSize];
     // if no texture exists, returns between 0.0 - 1.0
-    if(!(tex.x == 0.0f && tex.y == 0.0f)){
-        pxl.x *= tex.x;
-        pxl.y *= tex.y;
+    if(!(tex.width == 0.0f && tex.height == 0.0f)){
+        pxl.x *= tex.width;
+        pxl.y *= tex.height;
     }
     return pxl;
 }
@@ -257,10 +291,10 @@ GLKQuaternion GLKQuaternionFromTwoVectors(GLKVector3 u, GLKVector3 v){
     GLKVector4 screen = GLKVector4Make(2.0*(point.x/self.frame.size.width-.5),
                                        2.0*(.5-point.y/self.frame.size.height),
                                        1.0, 1.0);
-//    if (SENSOR_ORIENTATION == 3 || SENSOR_ORIENTATION == 4)
-//        screen = GLKVector4Make(2.0*(screenTouch.x/self.frame.size.height-.5),
-//                                2.0*(.5-screenTouch.y/self.frame.size.width),
-//                                1.0, 1.0);
+    //	if (SENSOR_ORIENTATION == 3 || SENSOR_ORIENTATION == 4)
+    //		screen = GLKVector4Make(2.0*(screenTouch.x/self.frame.size.height-.5),
+    //								2.0*(.5-screenTouch.y/self.frame.size.width),
+    //								1.0, 1.0);
     GLKVector4 vec = GLKMatrix4MultiplyVector4(inverse, screen);
     return GLKVector3Normalize(GLKVector3Make(vec.x, vec.y, vec.z));
 }
@@ -271,7 +305,7 @@ GLKQuaternion GLKQuaternionFromTwoVectors(GLKVector3 u, GLKVector3 v){
                        (0.5-screenVector.y/screenVector.z/2) * self.frame.size.height );
 }
 -(BOOL) computeScreenLocation:(CGPoint*)location fromVector:(GLKVector3)vector inAttitude:(GLKMatrix4)matrix{
-//This method returns whether the point is before or behind the screen.
+    //This method returns whether the point is before or behind the screen.
     GLKVector4 screenVector;
     GLKVector4 vector4;
     if(location == NULL)
@@ -326,15 +360,23 @@ GLKQuaternion GLKQuaternionFromTwoVectors(GLKVector3 u, GLKVector3 v){
 -(void) panHandler:(UIPanGestureRecognizer*)sender{
     static GLKVector3 touchVector;
     if([sender state] == 1){
-        touchVector = [self vectorFromScreenLocation:[sender locationInView:sender.view] inAttitude:_offsetMatrix];
+        CGPoint location = [sender locationInView:sender.view];
+        if(_VRMode){
+            location.y = ( (int)location.y % (int)(self.frame.size.height * 0.5) ) * 2.0;
+        }
+        touchVector = [self vectorFromScreenLocation:location inAttitude:_offsetMatrix];
     }
     else if([sender state] == 2){
-        GLKVector3 nowVector = [self vectorFromScreenLocation:[sender locationInView:sender.view] inAttitude:_offsetMatrix];
+        CGPoint location = [sender locationInView:sender.view];
+        if(_VRMode){
+            location.y = ( (int)location.y % (int)(self.frame.size.height * 0.5) ) * 2.0;
+        }
+        GLKVector3 nowVector = [self vectorFromScreenLocation:location inAttitude:_offsetMatrix];
         GLKQuaternion q = GLKQuaternionFromTwoVectors(touchVector, nowVector);
         _offsetMatrix = GLKMatrix4Multiply(_offsetMatrix, GLKMatrix4MakeWithQuaternion(q));
         // in progress for preventHeadTilt
-//        GLKMatrix4 mat = GLKMatrix4Multiply(_offsetMatrix, GLKMatrix4MakeWithQuaternion(q));
-//        _offsetMatrix = GLKMatrix4MakeLookAt(0, 0, 0, -mat.m02, -mat.m12, -mat.m22,  0, 1, 0);
+        //		GLKMatrix4 mat = GLKMatrix4Multiply(_offsetMatrix, GLKMatrix4MakeWithQuaternion(q));
+        //		_offsetMatrix = GLKMatrix4MakeLookAt(0, 0, 0, -mat.m02, -mat.m12, -mat.m22,  0, 1, 0);
     }
     else{
         _numberOfTouches = 0;
@@ -371,12 +413,15 @@ GLKQuaternion GLKQuaternionFromTwoVectors(GLKVector3 u, GLKVector3 v){
     glDisableClientState(GL_VERTEX_ARRAY);
     glPopMatrix();
 }
+-(void) dealloc{
+    [EAGLContext setCurrentContext:nil];
+}
 @end
 
 @interface Sphere (){
-//  from Touch Fighter by Apple
-//  in Pro OpenGL ES for iOS
-//  by Mike Smithwick Jan 2011 pg. 78
+    //  from Touch Fighter by Apple
+    //  in Pro OpenGL ES for iOS
+    //  by Mike Smithwick Jan 2011 pg. 78
     GLKTextureInfo *m_TextureInfo;
     GLfloat *m_TexCoordsData;
     GLfloat *m_VertexData;
@@ -386,6 +431,7 @@ GLKQuaternion GLKQuaternionFromTwoVectors(GLKVector3 u, GLKVector3 v){
 }
 -(GLKTextureInfo *) loadTextureFromBundle:(NSString *) filename;
 -(GLKTextureInfo *) loadTextureFromPath:(NSString *) path;
+-(GLKTextureInfo *) loadTextureFromImage:(UIImage *) image;
 @end
 @implementation Sphere
 -(id) init:(GLint)stacks slices:(GLint)slices radius:(GLfloat)radius textureFile:(NSString *)textureFile{
@@ -463,6 +509,20 @@ GLKQuaternion GLKQuaternionFromTwoVectors(GLKVector3 u, GLKVector3 v){
     }
     return self;
 }
+-(void) dealloc{
+    GLuint name = m_TextureInfo.name;
+    glDeleteTextures(1, &name);
+    
+    if(m_TexCoordsData != nil){
+        free(m_TexCoordsData);
+    }
+    if(m_NormalData != nil){
+        free(m_NormalData);
+    }
+    if(m_VertexData != nil){
+        free(m_VertexData);
+    }
+}
 -(bool) execute{
     glEnableClientState(GL_NORMAL_ARRAY);
     glEnableClientState(GL_VERTEX_ARRAY);
@@ -500,6 +560,19 @@ GLKQuaternion GLKQuaternionFromTwoVectors(GLKVector3 u, GLKVector3 v){
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, IMAGE_SCALING);
     return info;
 }
+-(GLKTextureInfo *) loadTextureFromImage:(UIImage *) image {
+    if(!image) return nil;
+    NSError *error;
+    GLKTextureInfo *info;
+    NSDictionary *options = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:YES],GLKTextureLoaderOriginBottomLeft, nil];
+    info = [GLKTextureLoader textureWithCGImage:image.CGImage options:options error:&error];
+    glBindTexture(GL_TEXTURE_2D, info.name);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, IMAGE_SCALING);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, IMAGE_SCALING);
+    return info;
+}
 -(void)swapTexture:(NSString*)textureFile{
     GLuint name = m_TextureInfo.name;
     glDeleteTextures(1, &name);
@@ -510,12 +583,17 @@ GLKQuaternion GLKQuaternionFromTwoVectors(GLKVector3 u, GLKVector3 v){
         m_TextureInfo = [self loadTextureFromBundle:textureFile];
     }
 }
--(CGPoint)getTextureSize{
+-(void)swapTextureWithImage:(UIImage*)image {
+    GLuint name = m_TextureInfo.name;
+    glDeleteTextures(1, &name);
+    m_TextureInfo = [self loadTextureFromImage:image];
+}
+-(CGSize)getTextureSize{
     if(m_TextureInfo){
-        return CGPointMake(m_TextureInfo.width, m_TextureInfo.height);
+        return CGSizeMake(m_TextureInfo.width, m_TextureInfo.height);
     }
     else{
-        return CGPointZero;
+        return CGSizeZero;
     }
 }
 

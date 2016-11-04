@@ -19,6 +19,8 @@
     return [super init];
 }
 
+
+
 -(void)_destroy
 {
     // This method is called from the dealloc method and is good place to
@@ -79,12 +81,11 @@
 
 -(void)viewWillAttach
 {
-    
 }
 
 -(void)viewDidAttach
 {
-    ComCaffeinaTiPanoramaView* ourView = (ComCaffeinaTiPanoramaView*)[self view];
+    [(ComCaffeinaTiPanoramaView*)self.view pv];
     [super viewDidAttach];
 }
 

@@ -125,8 +125,8 @@
 		08FB77AEFE84172EC02AAC07 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				C695C7051DCB4FA300906C12 /* PanoramaView.h */,
 				C695C7061DCB4FA300906C12 /* PanoramaView.m */,
+				C695C7051DCB4FA300906C12 /* PanoramaView.h */,
 				24DE9E0F11C5FE74003F90F6 /* ComCaffeinaTiPanoramaModuleAssets.h */,
 				24DE9E1011C5FE74003F90F6 /* ComCaffeinaTiPanoramaModuleAssets.m */,
 				24DD6CF71134B3F500162E58 /* ComCaffeinaTiPanoramaModule.h */,
@@ -201,6 +201,7 @@
 				Japanese,
 				French,
 				German,
+				Base,
 			);
 			mainGroup = 0867D691FE84028FC02AAC07 /* Ti.Panorama */;
 			productRefGroup = 034768DFFF38A50411DB9C8B /* Products */;

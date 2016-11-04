@@ -11,11 +11,11 @@
 #import "PanoramaView.h"
 
 @interface ComCaffeinaTiPanoramaView : TiUIView<GLKViewDelegate> {
-    NSString* image;
-    PanoramaView *pv;
+    PanoramaView* pv;
 }
 
 #pragma mark Public APIs
 -(void)setImage_:(id)value;
+-(PanoramaView*)pv;
 
 @end

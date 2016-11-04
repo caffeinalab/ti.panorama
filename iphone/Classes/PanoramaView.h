@@ -17,8 +17,11 @@
 
 -(void) draw;  // place in GLKViewController's glkView:drawInRect:
 
-/// Set image by path or bundle - will check at both
--(void) setImage:(NSString*)fileName;
+/// set image
+-(void) setImage:(UIImage*)image;
+
+/// set image by path or bundle - will check at both
+-(void) setImageWithName:(NSString*)fileName;
 
 
 /* orientation */
@@ -65,9 +68,13 @@
 
 /*  projection & touches  */
 
+/// Split screen mode for use in VR headsets
+@property (nonatomic) BOOL VRMode;
 
+/// Set of (UITouch*) touches currently active
 @property (nonatomic, readonly) NSSet *touches;
 
+/// The number of active screen touches
 @property (nonatomic, readonly) NSInteger numberOfTouches;
 
 /// Field of view in DEGREES
