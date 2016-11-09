@@ -7,27 +7,26 @@
 //
 
 #import "ComCaffeinaTiPanoramaView.h"
-#import "PanoramaView.h"
 
 @implementation ComCaffeinaTiPanoramaView
 
--(void)initializeState
+-(PanoramaViewController*)pvc
 {
-    [super initializeState];
-
-    if (self.pv == nil) {
-        self.pv = [[PanoramaView alloc] initWithFrame:self.frame];
-        [self.pv setDelegate:self];
-        [self.pv setImageWithName:@"park_2048.jpg"];
-        [self.pv setOrientToDevice:YES];
-        [self.pv setTouchToPan:NO];
-        [self.pv setPinchToZoom:YES];
-        [self.pv setShowTouches:NO];
-        [self.pv setVRMode:NO];
+    self.backgroundColor = [UIColor greenColor];
+    
+    if (pvc == nil) {
+        TiProxy *proxy = self.proxy;
         
-        [self addSubview:self.pv];
-
+        pvc = [[PanoramaViewController alloc] initWithFrame:self.frame];
+        UIImage* img = [UIImage imageNamed:@"park_2048.jpg"];
+        if (img == nil) {
+            NSLog(@"IMAGE NULL");
+        }
+        
+        [pvc.view setFrame:self.frame];
+        [self addSubview:pvc.view];
     }
+    return pvc;
 }
 
 -(void)dealloc
@@ -37,33 +36,22 @@
 
 
 -(void)setImage_:(id)value
-{    
-//    ENSURE_STRING(value);
-//    
-//    UIImage* image = [TiUtils toImage:value proxy:nil];
-//    if (image == nil) {
-//       DebugLog(@"Image is null");
-//    }
-//    [self.pv setImage:image];
+{
+    ENSURE_UI_THREAD_1_ARG(value);
+    ENSURE_STRING(value);
+    [self pvc];
 }
 
 - (void)frameSizeChanged:(CGRect)frame bounds:(CGRect)bounds
 {
-    [TiUtils setView:self.pv positionRect:bounds];
+    [TiUtils setView:[self pvc].view positionRect:bounds];
     [super frameSizeChanged:frame bounds:bounds];
 }
 
-
 -(void)draw:(id)args
 {
-    ENSURE_UI_THREAD_0_ARGS
-    [self.pv draw];
-}
-
-#pragma mark Delegates
-
-- (void)glkView:(GLKView *)view drawInRect:(CGRect)rect {
-    [self draw:nil];
+    ENSURE_UI_THREAD_0_ARGS;
+    
 }
 
 

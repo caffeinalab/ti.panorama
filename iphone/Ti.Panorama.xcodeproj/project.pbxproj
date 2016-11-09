@@ -39,6 +39,8 @@
 		C695C7041DCB487500906C12 /* CoreMotion.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C695C7031DCB487500906C12 /* CoreMotion.framework */; };
 		C695C7071DCB4FA300906C12 /* PanoramaView.h in Headers */ = {isa = PBXBuildFile; fileRef = C695C7051DCB4FA300906C12 /* PanoramaView.h */; };
 		C695C7081DCB4FA300906C12 /* PanoramaView.m in Sources */ = {isa = PBXBuildFile; fileRef = C695C7061DCB4FA300906C12 /* PanoramaView.m */; };
+		C6F09B741DD346590040BCEA /* PanoramaViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = C6F09B721DD346590040BCEA /* PanoramaViewController.h */; };
+		C6F09B751DD346590040BCEA /* PanoramaViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C6F09B731DD346590040BCEA /* PanoramaViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -70,6 +72,8 @@
 		C695C7031DCB487500906C12 /* CoreMotion.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMotion.framework; path = System/Library/Frameworks/CoreMotion.framework; sourceTree = SDKROOT; };
 		C695C7051DCB4FA300906C12 /* PanoramaView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PanoramaView.h; path = Classes/PanoramaView.h; sourceTree = "<group>"; };
 		C695C7061DCB4FA300906C12 /* PanoramaView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PanoramaView.m; path = Classes/PanoramaView.m; sourceTree = "<group>"; };
+		C6F09B721DD346590040BCEA /* PanoramaViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PanoramaViewController.h; path = Classes/PanoramaViewController.h; sourceTree = "<group>"; };
+		C6F09B731DD346590040BCEA /* PanoramaViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PanoramaViewController.m; path = Classes/PanoramaViewController.m; sourceTree = "<group>"; };
 		D2AAC07E0554694100DB518D /* libComCaffeinaTiPanorama.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libComCaffeinaTiPanorama.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -135,6 +139,8 @@
 				C695C6B61DCB3BE900906C12 /* ComCaffeinaTiPanoramaViewProxy.m */,
 				C695C6F51DCB41CC00906C12 /* ComCaffeinaTiPanoramaView.h */,
 				C695C6F61DCB41CC00906C12 /* ComCaffeinaTiPanoramaView.m */,
+				C6F09B721DD346590040BCEA /* PanoramaViewController.h */,
+				C6F09B731DD346590040BCEA /* PanoramaViewController.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -161,6 +167,7 @@
 				C695C6B71DCB3BE900906C12 /* ComCaffeinaTiPanoramaViewProxy.h in Headers */,
 				C695C7071DCB4FA300906C12 /* PanoramaView.h in Headers */,
 				24DE9E1111C5FE74003F90F6 /* ComCaffeinaTiPanoramaModuleAssets.h in Headers */,
+				C6F09B741DD346590040BCEA /* PanoramaViewController.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -238,6 +245,7 @@
 				24DD6CFA1134B3F500162E58 /* ComCaffeinaTiPanoramaModule.m in Sources */,
 				24DE9E1211C5FE74003F90F6 /* ComCaffeinaTiPanoramaModuleAssets.m in Sources */,
 				C695C6B81DCB3BE900906C12 /* ComCaffeinaTiPanoramaViewProxy.m in Sources */,
+				C6F09B751DD346590040BCEA /* PanoramaViewController.m in Sources */,
 				C695C7081DCB4FA300906C12 /* PanoramaView.m in Sources */,
 				C695C6F81DCB41CC00906C12 /* ComCaffeinaTiPanoramaView.m in Sources */,
 			);

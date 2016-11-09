@@ -13,6 +13,5 @@
     
 }
 
--(void)draw:(id)args;
 
 @end

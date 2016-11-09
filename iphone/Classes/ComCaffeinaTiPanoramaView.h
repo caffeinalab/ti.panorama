@@ -8,17 +8,11 @@
 
 #import "TiBase.h"
 #import "TiUIView.h"
-#import "PanoramaView.h"
+#import "PanoramaViewController.h"
 
-@interface ComCaffeinaTiPanoramaView : TiUIView<GLKViewDelegate> {
-
+@interface ComCaffeinaTiPanoramaView : TiUIView {
+    PanoramaViewController* pvc;
 }
 
-@property (nonatomic, assign) PanoramaView* pv;
-
-#pragma mark Public APIs
-
--(void)setImage_:(id)value;
--(void)draw:(id)args;
 
 @end
