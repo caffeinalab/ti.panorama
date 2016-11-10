@@ -6,8 +6,8 @@
 //
 //
 
+#import "TiBase.h"
 #import "PanoramaViewController.h"
-#import "UIKit/UIKit.h"
 
 @interface PanoramaViewController () {
 }
@@ -19,34 +19,31 @@
 - (id)initWithFrame:(CGRect)frame {
     if (self = [super init]) {
     
-        pv = [[PanoramaView alloc] initWithFrame:frame];
-        UIImage* img = [UIImage imageNamed:@"park_2048.jpg"];
-        if (img == nil) {
-            NSLog(@"IMAGE NULL");
-        }
-        [pv setImage: img];
+        self.pv = [[PanoramaView alloc] initWithFrame:frame];
         
-        [pv setOrientToDevice:YES];
-        [pv setTouchToPan:YES];
-        [pv setPinchToZoom:YES];
-        [pv setShowTouches:NO];
-        [pv setVRMode:NO];
-        
-       //  [pv setDelegate:self];
+        [self.pv setOrientToDevice:YES];
+        [self.pv setTouchToPan:YES];
+        [self.pv setPinchToZoom:YES];
+        [self.pv setShowTouches:YES];
+        [self.pv setVRMode:YES];
     }
     
     return self;
 }
 
 - (void)viewDidLoad {
+    ENSURE_UI_THREAD_0_ARGS
+
     [super viewDidLoad];
-    [self setView:pv];
+    [self setView:self.pv];
 }
 
 #pragma mark - GLKViewDelegate
 
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect {
-    [pv draw];
+    ENSURE_UI_THREAD_0_ARGS
+    
+    [self.pv draw];
 }
 
 - (void)didReceiveMemoryWarning {

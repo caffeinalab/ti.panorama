@@ -10,23 +10,16 @@
 
 @implementation ComCaffeinaTiPanoramaView
 
--(PanoramaViewController*)pvc
+-(void)initializeState
 {
-    self.backgroundColor = [UIColor greenColor];
+    ENSURE_UI_THREAD_0_ARGS
+
+    [super initializeState];
     
-    if (pvc == nil) {
-        TiProxy *proxy = self.proxy;
+    TiProxy *proxy = self.proxy;
         
-        pvc = [[PanoramaViewController alloc] initWithFrame:self.frame];
-        UIImage* img = [UIImage imageNamed:@"park_2048.jpg"];
-        if (img == nil) {
-            NSLog(@"IMAGE NULL");
-        }
-        
-        [pvc.view setFrame:self.frame];
-        [self addSubview:pvc.view];
-    }
-    return pvc;
+    pvc = [[PanoramaViewController alloc] initWithFrame:[self frame]];
+    [self addSubview:pvc.view];
 }
 
 -(void)dealloc
@@ -34,24 +27,33 @@
     [super dealloc];
 }
 
-
 -(void)setImage_:(id)value
 {
-    ENSURE_UI_THREAD_1_ARG(value);
-    ENSURE_STRING(value);
-    [self pvc];
+    ENSURE_UI_THREAD_1_ARG(value)
+    ENSURE_STRING(value)
+    
+    UIImage* image = [UIImage imageNamed:value];
+    if (image == nil) {
+        NSLog(@"IMAGE NULL");
+        return;
+    }
+    
+    [pvc.pv setImage:image];
 }
 
 - (void)frameSizeChanged:(CGRect)frame bounds:(CGRect)bounds
 {
-    [TiUtils setView:[self pvc].view positionRect:bounds];
+    ENSURE_UI_THREAD_0_ARGS
+
+    [TiUtils setView:pvc.view positionRect:bounds];
     [super frameSizeChanged:frame bounds:bounds];
 }
 
 -(void)draw:(id)args
 {
-    ENSURE_UI_THREAD_0_ARGS;
+    ENSURE_UI_THREAD_0_ARGS
     
+    [pvc.pv draw];
 }
 
 

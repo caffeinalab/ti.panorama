@@ -10,6 +10,7 @@
 #import <OpenGLES/ES1/gl.h>
 #import <GLKit/GLKit.h>
 #import "PanoramaView.h"
+#import "TiBase.h"
 
 #define FPS 60
 #define FOV_MIN 1
@@ -172,7 +173,7 @@ GLKQuaternion GLKQuaternionFromTwoVectors(GLKVector3 u, GLKVector3 v){
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 -(void)draw{
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     if(_VRMode) {
         float scale = [UIScreen mainScreen].scale;
@@ -200,7 +201,7 @@ GLKQuaternion GLKQuaternionFromTwoVectors(GLKVector3 u, GLKVector3 v){
     glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, whiteColor);  // panorama at full color
     [sphere execute];
     glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, clearColor);
-    //		[meridians execute];  // semi-transparent texture overlay (15° meridian lines)
+    // [meridians execute];  // semi-transparent texture overlay (15° meridian lines)
     
     //TODO: add any objects here to make them a part of the virtual reality
     //		glPushMatrix();
@@ -438,7 +439,7 @@ GLKQuaternion GLKQuaternionFromTwoVectors(GLKVector3 u, GLKVector3 v){
     // modifications:
     //   flipped(inverted) texture coords across the Z
     //   vertices rotated 90deg
-    if(textureFile != nil) m_TextureInfo = [self loadTextureFromBundle:textureFile];
+    // if(textureFile != nil) m_TextureInfo = [self loadTextureFromBundle:textureFile];
     m_Scale = radius;
     if((self = [super init])){
         m_Stacks = stacks;
@@ -510,8 +511,10 @@ GLKQuaternion GLKQuaternionFromTwoVectors(GLKVector3 u, GLKVector3 v){
     return self;
 }
 -(void) dealloc{
-    GLuint name = m_TextureInfo.name;
-    glDeleteTextures(1, &name);
+    return;
+    
+  // GLuint name = m_TextureInfo.name;
+  // glDeleteTextures(1, &name);
     
     if(m_TexCoordsData != nil){
         free(m_TexCoordsData);
@@ -574,8 +577,8 @@ GLKQuaternion GLKQuaternionFromTwoVectors(GLKVector3 u, GLKVector3 v){
     return info;
 }
 -(void)swapTexture:(NSString*)textureFile{
-    GLuint name = m_TextureInfo.name;
-    glDeleteTextures(1, &name);
+    //GLuint name = m_TextureInfo.name;
+    //glDeleteTextures(1, &name);
     if ([[NSFileManager defaultManager] fileExistsAtPath:textureFile]) {
         m_TextureInfo = [self loadTextureFromPath:textureFile];
     }
@@ -584,8 +587,8 @@ GLKQuaternion GLKQuaternionFromTwoVectors(GLKVector3 u, GLKVector3 v){
     }
 }
 -(void)swapTextureWithImage:(UIImage*)image {
-    GLuint name = m_TextureInfo.name;
-    glDeleteTextures(1, &name);
+    //GLuint name = m_TextureInfo.name;
+    //glDeleteTextures(1, &name);
     m_TextureInfo = [self loadTextureFromImage:image];
 }
 -(CGSize)getTextureSize{

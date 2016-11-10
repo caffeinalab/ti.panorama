@@ -7,11 +7,14 @@
 //
 
 #import <GLKit/GLKit.h>
+#import "UIImage+Resize.h"
 #import "PanoramaView.h"
 
 @interface PanoramaViewController : GLKViewController {
     PanoramaView* pv;
 }
+
+@property (strong, nonatomic) PanoramaView* pv;
 
 -(id)initWithFrame:(CGRect)frame;
 
